@@ -14,13 +14,13 @@ function initDatabase(callback) {
 	});
 }
 
-function updateRow(db, ip, port, code, country, anonymity, google, https, lastchecked, type) {
-	var statementIn = db.prepare("INSERT OR IGNORE INTO data VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-	statementIn.run(ip, port, type, code, country, anonymity, google, https, lastchecked);
+function updateRow(db, ip, port, country, anonymity, google, https, lastchecked, type) {
+	var statementIn = db.prepare("INSERT OR IGNORE INTO data VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+	statementIn.run(ip, port, type, country, anonymity, google, https, lastchecked);
 	statementIn.finalize();
 
-	var statementUp = db.prepare("UPDATE data SET port = ?, type = ?, code = ?, country = ?, anonymity = ?, google = ?, https = ?, lastchecked = ? WHERE ip LIKE ?");
-	statementUp.run(port, type, code, country, anonymity, google, https, lastchecked, ip);
+	var statementUp = db.prepare("UPDATE data SET port = ?, type = ?, country = ?, anonymity = ?, google = ?, https = ?, lastchecked = ? WHERE ip LIKE ?");
+	statementUp.run(port, type, country, anonymity, google, https, lastchecked, ip);
 	statementUp.finalize();
 }
 
@@ -81,7 +81,6 @@ function scrapper(db, site, type) {
 
 				var ip = $(item[0]).text();
 				var port = parseInt($(item[1]).text(), 10);
-				var code = $(item[2]).text();
 				var country = $(item[3]).text();
 				var anonymity = $(item[4]).text();
 				var google = $(item[5]).text();
@@ -108,7 +107,7 @@ function scrapper(db, site, type) {
 
 				var lastchecked = d.toJSON();
 
-				updateRow(db, ip, port, code, country, anonymity, google, https, lastchecked, type);
+				updateRow(db, ip, port, country, anonymity, google, https, lastchecked, type);
 			});
 			resolve();
 		});
@@ -122,6 +121,16 @@ function run(db) {
 	scrappers.push(scrapper(db, "http://sslproxies.org/", "ssl"));
 	scrappers.push(scrapper(db, "http://us-proxy.org/", "us"));
 	scrappers.push(scrapper(db, "http://free-proxy-list.net/uk-proxy.html", "uk"));
+	scrappers.push(scrapper(db, "http://www.sslproxies24.top/", "ssl"));
+	scrappers.push(scrapper(db, "https://list.proxylistplus.com/SSL-List-1", "ssl"));
+	scrappers.push(scrapper(db, "http://newfreshproxies-24.blogspot.com/", "ssl"));
+	scrappers.push(scrapper(db, "https://www.cool-proxy.net/proxies/http_proxy_list/country_code:US/port:/anonymous:", "us"));
+	scrappers.push(scrapper(db, "http://www.freeproxylists.com/https/d1513006225.html", "us"));
+	scrappers.push(scrapper(db, "http://proxydb.net/?protocol=http&protocol=https&anonlvl=2&anonlvl=3&anonlvl=4&country=&offset=0", "us"));
+	scrappers.push(scrapper(db, "http://proxydb.net/?protocol=http&protocol=https&anonlvl=2&anonlvl=3&anonlvl=4&country=&offset=15", "us"));
+	scrappers.push(scrapper(db, "http://proxydb.net/?protocol=http&protocol=https&anonlvl=2&anonlvl=3&anonlvl=4&country=&offset=30", "us"));
+	scrappers.push(scrapper(db, "http://proxydb.net/?protocol=http&protocol=https&anonlvl=2&anonlvl=3&anonlvl=4&country=&offset=45", "us"));
+	scrappers.push(scrapper(db, "http://proxydb.net/?protocol=http&protocol=https&anonlvl=2&anonlvl=3&anonlvl=4&country=&offset=60", "us"));
 	//skipped socks4/socks5
 	scrappers.push(scrapper(db, "http://google-proxy.net/", "google"));
 	scrappers.push(scrapper(db, "http://free-proxy-list.net/anonymous-proxy.html", "anonymous"));
